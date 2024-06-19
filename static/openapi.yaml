@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: TripAdvisor EU Restaurant Reviews API 3.0
+  description: |-
+    This API provides access to a database of restaurant reviews from TripAdvisor, specifically focusing on reviews from the EU. The API supports retrieving reviews with optional sentiment analysis, and it offers pagination to manage large sets of data.
+    
+    Some useful links:
+    - [Interactive Tableau Dashboard](https://public.tableau.com/app/profile/barbarasia/viz/TripAdvisorRestaurantReviewsforEUCities/TAReviewsDash)
+    
+    
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: https://api.tripadvisor.com/barbara
+tags:
+  - name: TripAdvisor Reviews
+    description: Find information about restaurant reviews
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+  - name: reviews
+    description: Access the reviews
+    externalDocs:
+      description: Find out more about our store
+      url: http://swagger.io
+
+paths:
+  /reviews:
+    get:
+      tags:
+        - reviews
+      summary: Get a list of restaurant reviews
+      description: Retrieves a paginated list of restaurant reviews. The response can optionally include sentiment analysis scores.
+      operationId: getReviews
+      parameters:
+        - name: page
+          in: query
+          description: The page number to retrieve
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          description: The number of reviews per page
+          required: false
+          schema:
+            type: integer
+            default: 50
+            maximum: 50
+        - name: include_sentiment
+          in: query
+          description: Set to 1 to include sentiment scores in the response
+          required: false
+          schema:
+            type: integer
+            enum: [0, 1]
+            default: 0
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+                  next_page:
+                    type: string
+                    example: '/reviews?page=2&page_size=50&include_sentiment=0'
+                  last_page:
+                    type: string
+                    example: '/reviews?page=10&page_size=50&include_sentiment=0'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /reviews/{restaurant_name}:
+    get:
+      tags:
+        - reviews
+      summary: Get review details for a specific restaurant
+      description: Retrieves detailed information for a specific restaurant review by name.
+      operationId: getReviewByName
+      parameters:
+        - name: restaurant_name
+          in: path
+          description: The name of the restaurant
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDetail'
+        '404':
+          description: Restaurant review not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Review:
+      type: object
+      properties:
+        Name:
+          type: string
+          example: "Restaurant A"
+        City:
+          type: string
+          example: "City A"
+        Cuisine:
+          type: string
+          example: "Italian"
+        Price_Range:
+          type: string
+          example: "$$"
+        Rating:
+          type: number
+          format: float
+          example: 4.5
+        Sentiment:
+          type: string
+          example: "Positive"
+    ReviewDetail:
+      type: object
+      properties:
+        Name:
+          type: string
+          example: "Restaurant A"
+        City:
+          type: string
+          example: "City A"
+        Cuisine:
+          type: string
+          example: "Italian"
+        Price_Range:
+          type: string
+          example: "$$"
+        Rating:
+          type: number
+          format: float
+          example: 4.5
+        Sentiment:
+          type: string
+          example: "Positive"
+        Reviews:
+          type: string
+          example: "Great atmosphere and friendly staff."
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Invalid request parameters"
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
