@@ -1,36 +1,25 @@
 openapi: 3.0.3
 info:
   title: TripAdvisor EU Restaurant Reviews API 3.0
-  description: |-
+  description: |
     This API provides access to a database of restaurant reviews from TripAdvisor, specifically focusing on reviews from the EU. The API supports retrieving reviews with optional sentiment analysis, and it offers pagination to manage large sets of data.
-    
+
     Some useful links:
     - [Interactive Tableau Dashboard](https://public.tableau.com/app/profile/barbarasia/viz/TripAdvisorRestaurantReviewsforEUCities/TAReviewsDash)
-    
-    
-  termsOfService: http://swagger.io/terms/
+
+  version: 1.0.11
   contact:
     email: apiteam@swagger.io
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.11
-externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
+
 servers:
   - url: https://api.tripadvisor.com/barbara
+
 tags:
   - name: TripAdvisor Reviews
     description: Find information about restaurant reviews
-    externalDocs:
-      description: Find out more
-      url: http://swagger.io
-  - name: reviews
-    description: Access the reviews
-    externalDocs:
-      description: Find out more about our store
-      url: http://swagger.io
 
 paths:
   /reviews:
@@ -44,14 +33,12 @@ paths:
         - name: page
           in: query
           description: The page number to retrieve
-          required: false
           schema:
             type: integer
             default: 1
         - name: page_size
           in: query
           description: The number of reviews per page
-          required: false
           schema:
             type: integer
             default: 50
@@ -59,7 +46,6 @@ paths:
         - name: include_sentiment
           in: query
           description: Set to 1 to include sentiment scores in the response
-          required: false
           schema:
             type: integer
             enum: [0, 1]
@@ -88,6 +74,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
   /reviews/{restaurant_name}:
     get:
       tags:
@@ -115,6 +102,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /reviews/create:
+    post:
+      summary: Create a new review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                city:
+                  type: string
+                cuisine:
+                  type: string
+                ranking:
+                  type: integer
+                number_of_reviews:
+                  type: integer
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+                price_range:
+                  type: string
+                rating:
+                  type: number
+                sentiment:
+                  type: string
+                cleaned_reviews:
+                  type: string
+      responses:
+        '201':
+          description: Review created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  # Add any other properties your response might include, like review_id
+        '400':
+          description: Bad request - missing or invalid data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
 components:
   schemas:
     Review:
@@ -139,6 +189,7 @@ components:
         Sentiment:
           type: string
           example: "Positive"
+
     ReviewDetail:
       type: object
       properties:
@@ -164,6 +215,7 @@ components:
         Reviews:
           type: string
           example: "Great atmosphere and friendly staff."
+
     Error:
       type: object
       properties:
@@ -173,8 +225,3 @@ components:
         message:
           type: string
           example: "Invalid request parameters"
-  securitySchemes:
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header
